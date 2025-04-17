@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-package geoipprocessor // import "github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor"
+package asprocessor // import "github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor"
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.uber.org/zap"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/provider"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/provider"
 )
 
 var (
@@ -25,20 +25,18 @@ var (
 )
 
 // newGeoIPProcessor creates a new instance of geoIPProcessor with the specified fields.
-type geoIPProcessor struct {
-	providers          []provider.GeoIPProvider
-	resourceAttributes []attribute.Key
-	logger             *zap.Logger
+type asProcessor struct {
+	providers []provider.AsProvider
+	logger    *zap.Logger
 
 	cfg *Config
 }
 
-func newGeoIPProcessor(processorConfig *Config, resourceAttributes []attribute.Key, providers []provider.GeoIPProvider, params processor.Settings) *geoIPProcessor {
-	return &geoIPProcessor{
-		resourceAttributes: resourceAttributes,
-		providers:          providers,
-		cfg:                processorConfig,
-		logger:             params.Logger,
+func newAsProcessor(processorConfig *Config, providers []provider.AsProvider, params processor.Settings) *asProcessor {
+	return &asProcessor{
+		providers: providers,
+		cfg:       processorConfig,
+		logger:    params.Logger,
 	}
 }
 
@@ -72,10 +70,10 @@ func ipFromAttributes(attributes []attribute.Key, resource pcommon.Map) (net.IP,
 
 // geoLocation fetches geolocation information for the given IP address using the configured providers.
 // It returns a set of attributes containing the geolocation data, or an error if the location could not be determined.
-func (g *geoIPProcessor) geoLocation(ctx context.Context, ip net.IP) (attribute.Set, error) {
+func (g *asProcessor) asn(ctx context.Context, ip net.IP) (attribute.Set, error) {
 	allAttributes := &attribute.Set{}
-	for _, geoProvider := range g.providers {
-		geoAttributes, err := geoProvider.Location(ctx, ip)
+	for _, asProvider := range g.providers {
+		asAttributes, err := asProvider.AutonomousSystem(ctx, ip)
 		if err != nil {
 			// continue if no metadata is found
 			if errors.Is(err, provider.ErrNoMetadataFound) {
@@ -84,15 +82,15 @@ func (g *geoIPProcessor) geoLocation(ctx context.Context, ip net.IP) (attribute.
 			}
 			return attribute.Set{}, err
 		}
-		*allAttributes = attribute.NewSet(append(allAttributes.ToSlice(), geoAttributes.ToSlice()...)...)
+		*allAttributes = attribute.NewSet(append(allAttributes.ToSlice(), asAttributes.ToSlice()...)...)
 	}
 
 	return *allAttributes, nil
 }
 
 // processAttributes processes a pcommon.Map by adding geolocation attributes based on the found IP address.
-func (g *geoIPProcessor) processAttributes(ctx context.Context, metadata pcommon.Map) error {
-	ipAddr, err := ipFromAttributes(g.resourceAttributes, metadata)
+func (g *asProcessor) processAttributes(ctx context.Context, metadata pcommon.Map) error {
+	ipAddr, err := ipFromAttributes(g.cfg.Attributes, metadata)
 	if err != nil {
 		// TODO: log IP error not found
 		if errors.Is(err, errIPNotFound) {
@@ -101,7 +99,7 @@ func (g *geoIPProcessor) processAttributes(ctx context.Context, metadata pcommon
 		return err
 	}
 
-	attributes, err := g.geoLocation(ctx, ipAddr)
+	attributes, err := g.asn(ctx, ipAddr)
 	if err != nil {
 		return err
 	}

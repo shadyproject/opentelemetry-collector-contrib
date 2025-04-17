@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-package geoipprocessor // import "github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor"
+package asprocessor // import "github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor"
 
 import (
 	"errors"
@@ -10,8 +10,9 @@ import (
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/confmap"
+	"go.opentelemetry.io/otel/attribute"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/provider"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/provider"
 )
 
 const (
@@ -43,6 +44,9 @@ type Config struct {
 
 	// Context section allows specifying the source type to look for the IP. Available options: resource or record.
 	Context ContextID `mapstructure:"context"`
+
+	// An array of attribute names, which are used for the IP address lookup
+	Attributes []attribute.Key `mapstructure:"attributes"`
 }
 
 var (
@@ -60,6 +64,10 @@ func (cfg *Config) Validate() error {
 		if err := providerConfig.Validate(); err != nil {
 			return fmt.Errorf("error validating provider %s: %w", providerID, err)
 		}
+	}
+
+	if cfg.Attributes != nil && len(cfg.Attributes) == 0 {
+		return errors.New("the attributes array must not be empty")
 	}
 
 	return nil

@@ -6,11 +6,11 @@ This package provides a MaxMind GeoIP provider for use with the OpenTelemetry Ge
 
 # Features
 
-- Supports GeoIP2-City and GeoLite2-City database types.
-- Retrieves and returns geographical metadata for a given IP address. The generated attributes follow the internal [Geo conventions](../../convention/attributes.go).
+- Supports GeoIP2-ISP and GeoLite2-ASN database types.
+- Retrieves and returns Autonomus System metadata for a given IP address. The generated attributes follow the internal [ASN conventions](../../convention/attributes.go).
 
 ## Configuration
 
 The following configuration must be provided:
 
-- `database_path`: local file path to a GeoIP2-City or GeoLite2-City database.
+- `database_path`: local file path to a GeoIP2-ISP or GeoLite2-ASN database.

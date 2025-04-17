@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-package maxmind // import "github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/provider/maxmindprovider"
+package maxmind // import "github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/provider/maxmindprovider"
 
 import (
 	"context"
@@ -12,15 +12,15 @@ import (
 	"github.com/oschwald/geoip2-golang"
 	"go.opentelemetry.io/otel/attribute"
 
-	conventions "github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/convention"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/provider"
+	conventions "github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/convention"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/provider"
 )
 
 var (
 	// defaultLanguageCode specifies English as the default Geolocation language code, see https://dev.maxmind.com/geoip/docs/web-services/responses#languages
 	defaultLanguageCode = "en"
-	geoIP2CityDBType    = "GeoIP2-City"
-	geoLite2CityDBType  = "GeoLite2-City"
+	geoIP2IspDBType     = "GeoIP2-ISP"
+	geoLite2AsnDBType   = "GeoLite2-ASN"
 
 	errUnsupportedDB = errors.New("unsupported geo IP database type")
 )
@@ -31,7 +31,7 @@ type maxMindProvider struct {
 	langCode string
 }
 
-var _ provider.GeoIPProvider = (*maxMindProvider)(nil)
+var _ provider.AsProvider = (*maxMindProvider)(nil)
 
 func newMaxMindProvider(cfg *Config) (*maxMindProvider, error) {
 	geoReader, err := geoip2.Open(cfg.DatabasePath)
@@ -43,10 +43,10 @@ func newMaxMindProvider(cfg *Config) (*maxMindProvider, error) {
 }
 
 // Location implements provider.GeoIPProvider for MaxMind. If a non City database type is used or no metadata is found in the database, an error will be returned.
-func (g *maxMindProvider) Location(_ context.Context, ipAddress net.IP) (attribute.Set, error) {
+func (g *maxMindProvider) AutonomousSystem(_ context.Context, ipAddress net.IP) (attribute.Set, error) {
 	switch g.geoReader.Metadata().DatabaseType {
-	case geoIP2CityDBType, geoLite2CityDBType:
-		attrs, err := g.cityAttributes(ipAddress)
+	case geoIP2IspDBType, geoLite2AsnDBType:
+		attrs, err := g.asAttributes(ipAddress)
 		if err != nil {
 			return attribute.Set{}, err
 		} else if len(*attrs) == 0 {
@@ -59,10 +59,10 @@ func (g *maxMindProvider) Location(_ context.Context, ipAddress net.IP) (attribu
 }
 
 // cityAttributes returns a list of key-values containing geographical metadata associated to the provided IP. The key names are populated using the internal geo IP conventions package. If an invalid or nil IP is provided, an error is returned.
-func (g *maxMindProvider) cityAttributes(ipAddress net.IP) (*[]attribute.KeyValue, error) {
+func (g *maxMindProvider) asAttributes(ipAddress net.IP) (*[]attribute.KeyValue, error) {
 	attributes := make([]attribute.KeyValue, 0, 11)
 
-	city, err := g.geoReader.City(ipAddress)
+	asn, err := g.geoReader.ASN(ipAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -74,29 +74,11 @@ func (g *maxMindProvider) cityAttributes(ipAddress net.IP) (*[]attribute.KeyValu
 		}
 	}
 
-	// city
-	appendIfNotEmpty(conventions.AttributeGeoCityName, city.City.Names[g.langCode])
-	// country
-	appendIfNotEmpty(conventions.AttributeGeoCountryName, city.Country.Names[g.langCode])
-	appendIfNotEmpty(conventions.AttributeGeoCountryIsoCode, city.Country.IsoCode)
-	// continent
-	appendIfNotEmpty(conventions.AttributeGeoContinentName, city.Continent.Names[g.langCode])
-	appendIfNotEmpty(conventions.AttributeGeoContinentCode, city.Continent.Code)
-	// postal code
-	appendIfNotEmpty(conventions.AttributeGeoPostalCode, city.Postal.Code)
-	// region
-	if len(city.Subdivisions) > 0 {
-		// The most specific subdivision is located at the last array position, see https://github.com/maxmind/GeoIP2-java/blob/2fe4c65424fed2c3c2449e5530381b6452b0560f/src/main/java/com/maxmind/geoip2/model/AbstractCityResponse.java#L112
-		mostSpecificSubdivision := city.Subdivisions[len(city.Subdivisions)-1]
-		appendIfNotEmpty(conventions.AttributeGeoRegionName, mostSpecificSubdivision.Names[g.langCode])
-		appendIfNotEmpty(conventions.AttributeGeoRegionIsoCode, mostSpecificSubdivision.IsoCode)
-	}
+	// AS number
+	attributes = append(attributes, attribute.Int(conventions.AttributeAsNumber, int(asn.AutonomousSystemNumber)))
+	appendIfNotEmpty(conventions.AttributesAsOrganizationName, asn.AutonomousSystemOrganization)
 
-	// location
-	appendIfNotEmpty(conventions.AttributeGeoTimezone, city.Location.TimeZone)
-	if city.Location.Latitude != 0 && city.Location.Longitude != 0 {
-		attributes = append(attributes, attribute.Float64(conventions.AttributeGeoLocationLat, city.Location.Latitude), attribute.Float64(conventions.AttributeGeoLocationLon, city.Location.Longitude))
-	}
+	// TODO: maxmind db asn has more geo info, possibly add it in here
 
 	return &attributes, err
 }

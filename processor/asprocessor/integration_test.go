@@ -1,15 +1,17 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-package geoipprocessor
+package asprocessor
 
 import (
 	"os"
 	"testing"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/provider"
-	maxmind "github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/provider/maxmindprovider"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/provider/maxmindprovider/testdata"
+	"go.opentelemetry.io/otel/attribute"
+
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/provider"
+	maxmind "github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/provider/maxmindprovider"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/provider/maxmindprovider/testdata"
 )
 
 func TestProcessorWithMaxMind(t *testing.T) {
@@ -17,12 +19,12 @@ func TestProcessorWithMaxMind(t *testing.T) {
 	defer os.RemoveAll(tmpDBfiles)
 
 	maxmindConfig := maxmind.Config{
-		DatabasePath: tmpDBfiles + "/" + "GeoLite2-City-Test.mmdb",
+		DatabasePath: tmpDBfiles + "/" + "GeoLite2-ISP-Test.mmdb",
 	}
 
 	for _, tt := range testCases {
 		t.Run("maxmind_"+tt.name, func(t *testing.T) {
-			cfg := &Config{Context: tt.context, Providers: map[string]provider.Config{"maxmind": &maxmindConfig}}
+			cfg := &Config{Context: tt.context, Providers: map[string]provider.Config{"maxmind": &maxmindConfig}, Attributes: []attribute.Key{"source.address", "client.address", "custom.address"}}
 
 			compareAllSignals(cfg, tt.goldenDir)(t)
 		})

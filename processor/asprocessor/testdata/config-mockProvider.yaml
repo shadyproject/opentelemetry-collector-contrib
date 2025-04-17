@@ -1,5 +1,5 @@
 processors:
-  geoip:
+  as:
     providers:
       mock:
         database: "/tmp/geodata.csv"
@@ -13,5 +13,5 @@ service:
   pipelines:
     metrics:
       receivers: [nop]
-      processors: [geoip]
+      processors: [as]
       exporters: [nop]

@@ -13,25 +13,25 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 )
 
-// ErrNoMetadataFound error should be returned when a provider could not find the corresponding IP metadata
-var ErrNoMetadataFound = errors.New("no geo IP metadata found")
+// ErrNoMetadataFound error should be returned when a provider could not find the corresponding ASN metadata
+var ErrNoMetadataFound = errors.New("no ASN metadata found")
 
 // Config is the configuration of a GeoIPProvider.
 type Config interface {
 	xconfmap.Validator
 }
 
-// GeoIPProvider defines methods for obtaining the geographical location based on the provided IP address.
-type GeoIPProvider interface {
-	// Location returns a set of attributes representing the geographical location for the given IP address. It requires a context for managing request lifetime.
-	Location(context.Context, net.IP) (attribute.Set, error)
+// AsProvider defines methods for obtaining the autonomous system information for a network
+type AsProvider interface {
+	// AutonomousSystem returns a set of attributes representing the Autonomous System information for a given IP address. It requires a context for managing request lifetime.
+	AutonomousSystem(context.Context, net.IP) (attribute.Set, error)
 }
 
 // GeoIPProviderFactory can create GeoIPProvider instances.
-type GeoIPProviderFactory interface {
+type AsProviderFactory interface {
 	// CreateDefaultConfig creates the default configuration for the GeoIPProvider.
 	CreateDefaultConfig() Config
 
-	// CreateGeoIPProvider creates a provider based on this config. Processor's settings are provided as an argument to initialize the logger if needed.
-	CreateGeoIPProvider(ctx context.Context, settings processor.Settings, cfg Config) (GeoIPProvider, error)
+	// CreateAsProvider creates a provider based on this config. Processor's settings are provided as an argument to initialize the logger if needed.
+	CreateAsProvider(ctx context.Context, settings processor.Settings, cfg Config) (AsProvider, error)
 }

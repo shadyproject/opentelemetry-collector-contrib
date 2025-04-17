@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-package geoipprocessor
+package asprocessor
 
 import (
 	"context"
@@ -15,8 +15,8 @@ import (
 	"go.opentelemetry.io/collector/processor"
 	"go.opentelemetry.io/collector/processor/processortest"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/metadata"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/provider"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/metadata"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/provider"
 )
 
 func TestCreateDefaultConfig(t *testing.T) {
@@ -74,7 +74,7 @@ func TestCreateProcessor_ProcessorKeyConfigError(t *testing.T) {
 }
 
 func TestCreateProcessor_FailedProvider(t *testing.T) {
-	baseMockFactory.CreateGeoIPProviderF = func(context.Context, processor.Settings, provider.Config) (provider.GeoIPProvider, error) {
+	baseMockFactory.CreateAsProviderF = func(context.Context, processor.Settings, provider.Config) (provider.AsProvider, error) {
 		return nil, errors.New("error creating provider")
 	}
 

@@ -1,1 +1,8 @@
-[{}]
+[{
+    "1.2.3.4/32" : {
+        "asn": {
+            "autonomous_system_number": 13335,
+            "autonomous_system_organization": "CLOUDFLARENET"
+        }
+    }
+}]

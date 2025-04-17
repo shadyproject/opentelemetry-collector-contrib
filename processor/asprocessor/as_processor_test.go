@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-package geoipprocessor
+package asprocessor
 
 import (
 	"context"
@@ -15,15 +15,14 @@ import (
 	"go.opentelemetry.io/collector/processor"
 	"go.opentelemetry.io/collector/processor/processortest"
 	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/plogtest"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
-	conventions "github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/convention"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/metadata"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/provider"
+	conventions "github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/convention"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/metadata"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/provider"
 )
 
 type providerConfigMock struct {
@@ -32,17 +31,17 @@ type providerConfigMock struct {
 
 type providerFactoryMock struct {
 	CreateDefaultConfigF func() provider.Config
-	CreateGeoIPProviderF func(context.Context, processor.Settings, provider.Config) (provider.GeoIPProvider, error)
+	CreateAsProviderF    func(context.Context, processor.Settings, provider.Config) (provider.AsProvider, error)
 }
 
 type providerMock struct {
-	LocationF func(context.Context, net.IP) (attribute.Set, error)
+	AutonomousSystemF func(context.Context, net.IP) (attribute.Set, error)
 }
 
 var (
-	_ provider.GeoIPProvider        = (*providerMock)(nil)
-	_ provider.GeoIPProvider        = (*providerMock)(nil)
-	_ provider.GeoIPProviderFactory = (*providerFactoryMock)(nil)
+	_ provider.AsProvider        = (*providerMock)(nil)
+	_ provider.AsProvider        = (*providerMock)(nil)
+	_ provider.AsProviderFactory = (*providerFactoryMock)(nil)
 )
 
 func (cm *providerConfigMock) Validate() error {
@@ -53,16 +52,16 @@ func (fm *providerFactoryMock) CreateDefaultConfig() provider.Config {
 	return fm.CreateDefaultConfigF()
 }
 
-func (fm *providerFactoryMock) CreateGeoIPProvider(ctx context.Context, settings processor.Settings, cfg provider.Config) (provider.GeoIPProvider, error) {
-	return fm.CreateGeoIPProviderF(ctx, settings, cfg)
+func (fm *providerFactoryMock) CreateAsProvider(ctx context.Context, settings processor.Settings, cfg provider.Config) (provider.AsProvider, error) {
+	return fm.CreateAsProviderF(ctx, settings, cfg)
 }
 
-func (pm *providerMock) Location(ctx context.Context, ip net.IP) (attribute.Set, error) {
-	return pm.LocationF(ctx, ip)
+func (pm *providerMock) AutonomousSystem(ctx context.Context, ip net.IP) (attribute.Set, error) {
+	return pm.AutonomousSystemF(ctx, ip)
 }
 
 var baseMockProvider = providerMock{
-	LocationF: func(context.Context, net.IP) (attribute.Set, error) {
+	AutonomousSystemF: func(context.Context, net.IP) (attribute.Set, error) {
 		return attribute.Set{}, nil
 	},
 }
@@ -71,64 +70,63 @@ var baseMockFactory = providerFactoryMock{
 	CreateDefaultConfigF: func() provider.Config {
 		return &providerConfigMock{ValidateF: func() error { return nil }}
 	},
-	CreateGeoIPProviderF: func(context.Context, processor.Settings, provider.Config) (provider.GeoIPProvider, error) {
+	CreateAsProviderF: func(context.Context, processor.Settings, provider.Config) (provider.AsProvider, error) {
 		return &baseMockProvider, nil
 	},
 }
 
 var baseProviderMock = providerMock{
-	LocationF: func(context.Context, net.IP) (attribute.Set, error) {
+	AutonomousSystemF: func(context.Context, net.IP) (attribute.Set, error) {
 		return attribute.Set{}, nil
 	},
 }
 
 var testCases = []struct {
-	name             string
-	goldenDir        string
-	context          ContextID
-	lookupAttributes []attribute.Key
+	name       string
+	goldenDir  string
+	context    ContextID
+	attributes []attribute.Key
 }{
 	{
-		name:             "default source.address attribute, not found",
-		goldenDir:        "no_source_address",
-		context:          resource,
-		lookupAttributes: defaultResourceAttributes,
+		name:      "default source.address attribute, not found",
+		goldenDir: "resource_no_source_address",
+		context:   resource,
 	},
 	{
-		name:             "default source.address attribute",
-		goldenDir:        "source_address",
-		context:          resource,
-		lookupAttributes: defaultResourceAttributes,
+		name:      "default source.address attribute",
+		goldenDir: "resource_source_address",
+		context:   resource,
 	},
 	{
-		name:             "default source.address attribute no geo metadata found by providers",
-		goldenDir:        "source_address_geo_not_found",
-		context:          resource,
-		lookupAttributes: defaultResourceAttributes,
+		name:      "default source.address attribute no geo metadata found by providers",
+		goldenDir: "resource_source_address_geo_not_found",
+		context:   resource,
 	},
 	{
-		name:             "default source.ip attribute with an unspecified IP address should be skipped",
-		goldenDir:        "unspecified_address",
-		context:          resource,
-		lookupAttributes: defaultResourceAttributes,
+		name:      "default source.ip attribute with an unspecified IP address should be skipped",
+		goldenDir: "resource_unspecified_address",
+		context:   resource,
 	},
 	{
-		name:             "custom source attributes",
-		goldenDir:        "custom_sources",
-		context:          resource,
-		lookupAttributes: []attribute.Key{"ip", "host.ip"},
+		name:      "do not add resource attributes with an invalid ip",
+		goldenDir: "resource_invalid_address",
+		context:   resource,
 	},
 	{
-		name:             "do not add resource attributes with an invalid ip",
-		goldenDir:        "invalid_address",
-		context:          resource,
-		lookupAttributes: defaultResourceAttributes,
+		name:      "source address located in the record attributes",
+		goldenDir: "record_source_address",
+		context:   record,
 	},
 	{
-		name:             "source address located in inner attributes",
-		goldenDir:        "attribute_source_address",
-		context:          record,
-		lookupAttributes: defaultResourceAttributes,
+		name:      "client address located in the record attributes",
+		goldenDir: "record_client_address",
+		context:   record,
+	},
+	{
+		name:       "custom address located in the record attributes",
+		goldenDir:  "record_custom_address",
+		context:    record,
+		attributes: []attribute.Key{"source.address", "client.address", "custom.address"},
 	},
 }
 
@@ -199,25 +197,15 @@ func compareAllSignals(cfg component.Config, goldenDir string) func(t *testing.T
 func TestProcessor(t *testing.T) {
 	t.Parallel()
 
-	baseMockFactory.CreateGeoIPProviderF = func(context.Context, processor.Settings, provider.Config) (provider.GeoIPProvider, error) {
+	baseMockFactory.CreateAsProviderF = func(context.Context, processor.Settings, provider.Config) (provider.AsProvider, error) {
 		return &baseProviderMock, nil
 	}
 
-	baseProviderMock.LocationF = func(_ context.Context, sourceIP net.IP) (attribute.Set, error) {
+	baseProviderMock.AutonomousSystemF = func(_ context.Context, sourceIP net.IP) (attribute.Set, error) {
 		if sourceIP.Equal(net.IPv4(1, 2, 3, 4)) {
 			return attribute.NewSet([]attribute.KeyValue{
-				semconv.SourceAddress("1.2.3.4"),
-				attribute.String(conventions.AttributeGeoCityName, "Boxford"),
-				attribute.String(conventions.AttributeGeoContinentCode, "EU"),
-				attribute.String(conventions.AttributeGeoContinentName, "Europe"),
-				attribute.String(conventions.AttributeGeoCountryIsoCode, "GB"),
-				attribute.String(conventions.AttributeGeoCountryName, "United Kingdom"),
-				attribute.String(conventions.AttributeGeoTimezone, "Europe/London"),
-				attribute.String(conventions.AttributeGeoRegionIsoCode, "WBK"),
-				attribute.String(conventions.AttributeGeoRegionName, "West Berkshire"),
-				attribute.String(conventions.AttributeGeoPostalCode, "OX1"),
-				attribute.Float64(conventions.AttributeGeoLocationLat, 1234),
-				attribute.Float64(conventions.AttributeGeoLocationLon, 5678),
+				attribute.Int(conventions.AttributeAsNumber, 13337),
+				attribute.String(conventions.AttributesAsOrganizationName, "CLOUDFLARENET"),
 			}...), nil
 		}
 		return attribute.Set{}, provider.ErrNoMetadataFound
@@ -227,7 +215,11 @@ func TestProcessor(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			cfg := &Config{Context: tt.context, Providers: map[string]provider.Config{providerKey: &providerConfigMock{}}}
+			var attributes []attribute.Key = defaultAttributes
+			if tt.attributes != nil {
+				attributes = tt.attributes
+			}
+			cfg := &Config{Context: tt.context, Providers: map[string]provider.Config{providerKey: &providerConfigMock{}}, Attributes: attributes}
 			compareAllSignals(cfg, tt.goldenDir)(t)
 		})
 	}

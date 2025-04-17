@@ -6,7 +6,7 @@ package maxmind // import "github.com/open-telemetry/opentelemetry-collector-con
 import (
 	"errors"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/provider"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/provider"
 )
 
 // Config defines configuration for MaxMind provider.
@@ -21,7 +21,7 @@ var _ provider.Config = (*Config)(nil)
 // Validate implements provider.Config.
 func (c *Config) Validate() error {
 	if c.DatabasePath == "" {
-		return errors.New("a local geoIP database path must be provided")
+		return errors.New("a local asn database path must be provided")
 	}
 	return nil
 }

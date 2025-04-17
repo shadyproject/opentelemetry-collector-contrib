@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-package geoipprocessor // import "github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor"
+package asprocessor // import "github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor"
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/ptrace"
 )
 
-func (g *geoIPProcessor) processTraces(ctx context.Context, ts ptrace.Traces) (ptrace.Traces, error) {
+func (g *asProcessor) processTraces(ctx context.Context, ts ptrace.Traces) (ptrace.Traces, error) {
 	rt := ts.ResourceSpans()
 	for i := 0; i < rt.Len(); i++ {
 		switch g.cfg.Context {

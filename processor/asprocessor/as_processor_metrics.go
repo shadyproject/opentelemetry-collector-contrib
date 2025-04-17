@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-package geoipprocessor // import "github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor"
+package asprocessor // import "github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor"
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-func (g *geoIPProcessor) processMetrics(ctx context.Context, ms pmetric.Metrics) (pmetric.Metrics, error) {
+func (g *asProcessor) processMetrics(ctx context.Context, ms pmetric.Metrics) (pmetric.Metrics, error) {
 	rm := ms.ResourceMetrics()
 	for i := 0; i < rm.Len(); i++ {
 		switch g.cfg.Context {
@@ -34,7 +34,7 @@ func (g *geoIPProcessor) processMetrics(ctx context.Context, ms pmetric.Metrics)
 	return ms, nil
 }
 
-func (g *geoIPProcessor) processMetricAttributes(ctx context.Context, m pmetric.Metric) error {
+func (g *asProcessor) processMetricAttributes(ctx context.Context, m pmetric.Metric) error {
 	// This is a lot of repeated code, but since there is no single parent superclass
 	// between metric data types, we can't use polymorphism.
 	//exhaustive:enforce
