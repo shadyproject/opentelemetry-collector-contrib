@@ -32,7 +32,7 @@ func TestLoadConfig(t *testing.T) {
 	}{
 		{
 			id:                   component.NewID(metadata.Type),
-			validateErrorMessage: "must specify at least one geo IP data provider when using the geoip processor",
+			validateErrorMessage: "must specify at least one maxmind data provider when using the as processor",
 		},
 		{
 			id: component.NewIDWithName(metadata.Type, "maxmind"),
@@ -114,7 +114,7 @@ func TestLoadConfig_InvalidProviderKey(t *testing.T) {
 	factories.Processors[metadata.Type] = factory
 	_, err = otelcoltest.LoadConfigAndValidate(filepath.Join("testdata", "config-invalidProviderKey.yaml"), factories)
 
-	require.ErrorContains(t, err, "error reading configuration for \"geoip\": invalid provider key: invalidProviderKey")
+	require.ErrorContains(t, err, "error reading configuration for \"as\": invalid provider key: invalidProviderKey")
 }
 
 func TestLoadConfig_ValidProviderKey(t *testing.T) {

@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-package maxmind // import "github.com/open-telemetry/opentelemetry-collector-contrib/processor/geoipprocessor/internal/provider/maxmindprovider"
+package maxmind // import "github.com/open-telemetry/opentelemetry-collector-contrib/processor/asprocessor/internal/provider/maxmindprovider"
 
 import (
 	"errors"

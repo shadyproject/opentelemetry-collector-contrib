@@ -36,7 +36,7 @@ var _ provider.AsProvider = (*maxMindProvider)(nil)
 func newMaxMindProvider(cfg *Config) (*maxMindProvider, error) {
 	geoReader, err := geoip2.Open(cfg.DatabasePath)
 	if err != nil {
-		return nil, fmt.Errorf("could not open geoip database: %w", err)
+		return nil, fmt.Errorf("could not open asn database: %w", err)
 	}
 
 	return &maxMindProvider{geoReader: geoReader, langCode: defaultLanguageCode}, nil
@@ -51,6 +51,8 @@ func (g *maxMindProvider) AutonomousSystem(_ context.Context, ipAddress net.IP) 
 			return attribute.Set{}, err
 		} else if len(*attrs) == 0 {
 			return attribute.Set{}, provider.ErrNoMetadataFound
+		} else if (*attrs)[0].Value.AsInt64() == 0 {
+			return attribute.Set{}, provider.ErrNoMetadataFound
 		}
 		return attribute.NewSet(*attrs...), nil
 	default:
@@ -58,9 +60,9 @@ func (g *maxMindProvider) AutonomousSystem(_ context.Context, ipAddress net.IP) 
 	}
 }
 
-// cityAttributes returns a list of key-values containing geographical metadata associated to the provided IP. The key names are populated using the internal geo IP conventions package. If an invalid or nil IP is provided, an error is returned.
+// asAttributes returns a list of key-values containing geographical metadata associated to the provided IP. The key names are populated using the internal geo IP conventions package. If an invalid or nil IP is provided, an error is returned.
 func (g *maxMindProvider) asAttributes(ipAddress net.IP) (*[]attribute.KeyValue, error) {
-	attributes := make([]attribute.KeyValue, 0, 11)
+	attributes := make([]attribute.KeyValue, 0, 4)
 
 	asn, err := g.geoReader.ASN(ipAddress)
 	if err != nil {

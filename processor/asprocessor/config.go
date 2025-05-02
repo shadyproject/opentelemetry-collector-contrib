@@ -56,7 +56,7 @@ var (
 
 func (cfg *Config) Validate() error {
 	if len(cfg.Providers) == 0 {
-		return errors.New("must specify at least one geo IP data provider when using the geoip processor")
+		return errors.New("must specify at least one maxmind data provider when using the as processor")
 	}
 
 	// validate all provider's configuration

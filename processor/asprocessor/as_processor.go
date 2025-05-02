@@ -24,7 +24,7 @@ var (
 	errUnspecifiedSource = errors.New("no source attributes defined")
 )
 
-// newGeoIPProcessor creates a new instance of geoIPProcessor with the specified fields.
+// newAsProcessor creates a new instance of asProcessor with the specified fields.
 type asProcessor struct {
 	providers []provider.AsProvider
 	logger    *zap.Logger

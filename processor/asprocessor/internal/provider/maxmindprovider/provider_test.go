@@ -49,7 +49,7 @@ func TestProviderLocation(t *testing.T) {
 	}{
 		{
 			name:           "nil IP address",
-			testDatabase:   "GeoIP2-ASN-Test.mmdb",
+			testDatabase:   "GeoIP2-ISP-Test.mmdb",
 			expectedErrMsg: "IP passed to Lookup cannot be nil",
 		},
 		{
@@ -59,28 +59,27 @@ func TestProviderLocation(t *testing.T) {
 			expectedErrMsg: "unsupported geo IP database type type: GeoIP2-Domain",
 		},
 		{
-			// TODO: change then when we add test data
 			name:           "no IP metadata in database",
 			sourceIP:       net.IPv4(0, 0, 0, 0),
 			testDatabase:   "GeoIP2-ISP-Test.mmdb",
-			expectedErrMsg: "no geo IP metadata found",
+			expectedErrMsg: "no ASN metadata found",
 		},
 		{
-			name:         "all attributes should be present for IPv4 using GeoLite2-City database",
-			sourceIP:     net.IPv4(1, 2, 3, 4),
+			name:         "all attributes should be present for IPv4 using GeoLite2-ASN database",
+			sourceIP:     net.IPv4(1, 0, 0, 1),
 			testDatabase: "GeoLite2-ASN-Test.mmdb",
 			expectedAttributes: attribute.NewSet([]attribute.KeyValue{
-				attribute.Int(conventions.AttributeAsNumber, 13337),
-				attribute.String(conventions.AttributesAsOrganizationName, "CLOUDFLARENET"),
+				attribute.Int(conventions.AttributeAsNumber, 15169),
+				attribute.String(conventions.AttributesAsOrganizationName, "Google Inc."),
 			}...),
 		},
 		{
-			name:         "subset attributes for IPv6 IP using GeoIP2-City database",
-			sourceIP:     net.ParseIP("2001:220::"),
+			name:         "subset attributes for IPv6 IP using GeoIP2-ISP database",
+			sourceIP:     net.ParseIP("2400:220::"),
 			testDatabase: "GeoIP2-ISP-Test.mmdb",
 			expectedAttributes: attribute.NewSet([]attribute.KeyValue{
-				attribute.Int(conventions.AttributeAsNumber, 13337),
-				attribute.String(conventions.AttributesAsOrganizationName, "CLOUDFLARENET"),
+				attribute.Int(conventions.AttributeAsNumber, 4766),
+				attribute.String(conventions.AttributesAsOrganizationName, "Korea Telecom"),
 			}...),
 		},
 	}

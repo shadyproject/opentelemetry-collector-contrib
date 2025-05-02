@@ -27,6 +27,6 @@ func TestCreateProvider(t *testing.T) {
 
 	provider, err := factory.CreateAsProvider(context.Background(), processortest.NewNopSettings(metadata.Type), cfg)
 
-	assert.ErrorContains(t, err, "could not open geoip database")
+	assert.ErrorContains(t, err, "could not open asn database")
 	assert.Nil(t, provider)
 }

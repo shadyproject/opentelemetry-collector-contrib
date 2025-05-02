@@ -17,83 +17,23 @@ resourceMetrics:
                     - key: a
                       value:
                         stringValue: AAAA
-                    - key: geo.city_name
+                    - key: as.number
                       value:
-                        stringValue: Boxford
-                    - key: geo.continent_code
+                        intValue: 13337
+                    - key: as.organization.name
                       value:
-                        stringValue: EU
-                    - key: geo.continent_name
-                      value:
-                        stringValue: Europe
-                    - key: geo.country_iso_code
-                      value:
-                        stringValue: GB
-                    - key: geo.country_name
-                      value:
-                        stringValue: United Kingdom
-                    - key: geo.location.lat
-                      value:
-                        doubleValue: 1234
-                    - key: geo.location.lon
-                      value:
-                        doubleValue: 5678
-                    - key: geo.postal_code
-                      value:
-                        stringValue: OX1
-                    - key: geo.region_iso_code
-                      value:
-                        stringValue: WBK
-                    - key: geo.region_name
-                      value:
-                        stringValue: West Berkshire
-                    - key: geo.timezone
-                      value:
-                        stringValue: Europe/London
-                    - key: client.address
-                      value:
-                        stringValue: 1.2.3.4
+                        stringValue: CLOUDFLARENET
             unit: "1"
           - histogram:
               aggregationTemporality: 1
               dataPoints:
                 - attributes:
-                    - key: geo.city_name
+                    - key: as.number
                       value:
-                        stringValue: Boxford
-                    - key: geo.continent_code
+                        intValue: 13337
+                    - key: as.organization.name
                       value:
-                        stringValue: EU
-                    - key: geo.continent_name
-                      value:
-                        stringValue: Europe
-                    - key: geo.country_iso_code
-                      value:
-                        stringValue: GB
-                    - key: geo.country_name
-                      value:
-                        stringValue: United Kingdom
-                    - key: geo.location.lat
-                      value:
-                        doubleValue: 1234
-                    - key: geo.location.lon
-                      value:
-                        doubleValue: 5678
-                    - key: geo.postal_code
-                      value:
-                        stringValue: OX1
-                    - key: geo.region_iso_code
-                      value:
-                        stringValue: WBK
-                    - key: geo.region_name
-                      value:
-                        stringValue: West Berkshire
-                    - key: geo.timezone
-                      value:
-                        stringValue: Europe/London
-                    - key: client.address
-                      value:
-                        stringValue: 1.2.3.4
+                        stringValue: CLOUDFLARENET
                   bucketCounts:
                     - "9"
                     - "12"
@@ -112,42 +52,12 @@ resourceMetrics:
             summary:
               dataPoints:
                 - attributes:
-                    - key: geo.city_name
+                    - key: as.number
                       value:
-                        stringValue: Boxford
-                    - key: geo.continent_code
+                        intValue: 13337
+                    - key: as.organization.name
                       value:
-                        stringValue: EU
-                    - key: geo.continent_name
-                      value:
-                        stringValue: Europe
-                    - key: geo.country_iso_code
-                      value:
-                        stringValue: GB
-                    - key: geo.country_name
-                      value:
-                        stringValue: United Kingdom
-                    - key: geo.location.lat
-                      value:
-                        doubleValue: 1234
-                    - key: geo.location.lon
-                      value:
-                        doubleValue: 5678
-                    - key: geo.postal_code
-                      value:
-                        stringValue: OX1
-                    - key: geo.region_iso_code
-                      value:
-                        stringValue: WBK
-                    - key: geo.region_name
-                      value:
-                        stringValue: West Berkshire
-                    - key: geo.timezone
-                      value:
-                        stringValue: Europe/London
-                    - key: client.address
-                      value:
-                        stringValue: 1.2.3.4
+                        stringValue: CLOUDFLARENET
                   quantileValues:
                     - quantile: 0.25
                       value: 50
@@ -165,42 +75,12 @@ resourceMetrics:
                     - key: aaa
                       value:
                         stringValue: bbb
-                    - key: geo.city_name
+                    - key: as.number
                       value:
-                        stringValue: Boxford
-                    - key: geo.continent_code
+                        intValue: 13337
+                    - key: as.organization.name
                       value:
-                        stringValue: EU
-                    - key: geo.continent_name
-                      value:
-                        stringValue: Europe
-                    - key: geo.country_iso_code
-                      value:
-                        stringValue: GB
-                    - key: geo.country_name
-                      value:
-                        stringValue: United Kingdom
-                    - key: geo.location.lat
-                      value:
-                        doubleValue: 1234
-                    - key: geo.location.lon
-                      value:
-                        doubleValue: 5678
-                    - key: geo.postal_code
-                      value:
-                        stringValue: OX1
-                    - key: geo.region_iso_code
-                      value:
-                        stringValue: WBK
-                    - key: geo.region_name
-                      value:
-                        stringValue: West Berkshire
-                    - key: geo.timezone
-                      value:
-                        stringValue: Europe/London
-                    - key: client.address
-                      value:
-                        stringValue: 1.2.3.4
+                        stringValue: CLOUDFLARENET
                   timeUnixNano: "1000000"
             name: test.gauge
         schemaUrl: https://test-scope-schema.com/schema

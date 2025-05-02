@@ -17,7 +17,7 @@ The following [resource attributes](./internal/convention/attributes.go) will be
 
 The following settings can be configured:
 
-- `providers`: A map containing as information providers. These providers are used to search for the as location attributes associated with an IP. Supported providers:
+- `providers`: A map containing geographical location information providers. These providers are used to search for the geographical location attributes associated with an IP. Supported providers:
   - [maxmind](./internal/provider/maxmindprovider/README.md)
 - `context` (default: `resource`): Allows specifying the underlying telemetry context the processor will work with. Available values:
   - `resource`: Resource attributes.
